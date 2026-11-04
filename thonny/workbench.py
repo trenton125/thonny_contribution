@@ -382,7 +382,7 @@ class Workbench(tk.Tk):
         self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
-        self.set_default("general.scaling", "default")
+        self.set_default("general.scaling", 1.5)
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("general.environment", [])
@@ -2382,7 +2382,7 @@ class Workbench(tk.Tk):
 
         scaling = self.get_option("general.scaling")
         if scaling in ["default", "auto"]:  # auto was used in 2.2b3
-            self._scaling_factor = self._default_scaling_factor
+            self._scaling_factor = 1.5
         else:
             self._scaling_factor = float(scaling)
 

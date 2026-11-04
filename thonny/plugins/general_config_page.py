@@ -1,5 +1,6 @@
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from typing import List, Optional
+import tkinter as tk
 
 from thonny import get_workbench, languages
 from thonny.config_ui import (
@@ -12,7 +13,7 @@ from thonny.config_ui import (
 )
 from thonny.languages import tr
 from thonny.misc_utils import running_on_linux
-from thonny.ui_utils import get_last_grid_row
+from thonny.ui_utils import ems_to_pixels, get_last_grid_row
 
 
 class GeneralConfigurationPage(ConfigurationPage):
@@ -63,13 +64,40 @@ class GeneralConfigurationPage(ConfigurationPage):
             self, "general.ui_mode", tr("UI mode"), choices=["simple", "regular"], width=10
         )
 
-        add_option_combobox(
-            self,
-            "general.scaling",
-            tr("UI scaling factor"),
-            choices=["default"] + sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0}),
-            width=10,
+        current_scaling = get_workbench().get_option("general.scaling")
+        if current_scaling in ["default", "auto"]:
+            initial_scaling = 1.5
+        else:
+            initial_scaling = max(0.5, min(16.0, round(float(current_scaling) * 2) / 2))
+
+        scaling_row = self.grid_size()[1]
+        ttk.Label(self, text=tr("UI scaling factor")).grid(
+            row=scaling_row, column=0, sticky="w", padx=(0, ems_to_pixels(1))
         )
+        scaling_value = tk.DoubleVar(self, value=initial_scaling)
+        scaling_label = ttk.Label(self)
+        scaling_label.grid(row=scaling_row, column=2, sticky="w")
+
+        def update_scaling(value):
+            value = round(float(value) * 2) / 2
+            value = max(0.5, min(16.0, value))
+            get_workbench().set_option("general.scaling", value)
+            scaling_label.configure(text=f"{value:.1f}x")
+
+        scaling_slider = tk.Scale(
+            self,
+            from_=0.5,
+            to=16.0,
+            orient=tk.HORIZONTAL,
+            variable=scaling_value,
+            resolution=0.5,
+            length=ems_to_pixels(15),
+            command=update_scaling,
+            showvalue=False,
+        )
+        scaling_slider.grid(row=scaling_row, column=1, sticky="ew")
+        scaling_label.configure(text=f"{initial_scaling:.1f}x")
+        self.columnconfigure(1, weight=1)
 
         add_option_combobox(
             self,
